@@ -1,0 +1,1 @@
+# Multimodal-Retreival-Product-Weaviate
