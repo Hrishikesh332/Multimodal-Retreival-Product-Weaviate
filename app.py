@@ -80,7 +80,7 @@ def generate_image_embedding(image_file):
         return None, str(e)
 
 def store_embeddings(client, embeddings):
-    """Store video embeddings in Weaviate"""
+    
     try:
         batch = client.batch.configure(batch_size=100)
         with batch:
@@ -151,68 +151,68 @@ def render_video_result(result):
     )
     st.video(video_url)
 
-def get_chat_response(openai_client, question, context=""):
+# def get_chat_response(openai_client, question, context=""):
  
-    try:
-        if not openai_client:
-            return {
-                "response": "OpenAI client is not properly initialized. Please check your API key.",
-                "metadata": None
-            }
+#     try:
+#         if not openai_client:
+#             return {
+#                 "response": "OpenAI client is not properly initialized. Please check your API key.",
+#                 "metadata": None
+#             }
         
-        messages = [
-            {
-                "role": "system",
-                "content": """You are a helpful video search assistant. Help users find and understand video content.
-                When discussing videos, focus on relevant details and timestamps."""
-            },
-            {
-                "role": "user",
-                "content": f"Question: {question}\nContext: {context}"
-            }
-        ]
+#         messages = [
+#             {
+#                 "role": "system",
+#                 "content": """You are a helpful video search assistant. Help users find and understand video content.
+#                 When discussing videos, focus on relevant details and timestamps."""
+#             },
+#             {
+#                 "role": "user",
+#                 "content": f"Question: {question}\nContext: {context}"
+#             }
+#         ]
         
-        try:
-            chat_response = openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=500
-            )
+#         try:
+#             chat_response = openai_client.chat.completions.create(
+#                 model="gpt-3.5-turbo",
+#                 messages=messages,
+#                 temperature=0.7,
+#                 max_tokens=500
+#             )
             
-            if not chat_response or not chat_response.choices:
-                raise Exception("Empty response from OpenAI")
+#             if not chat_response or not chat_response.choices:
+#                 raise Exception("Empty response from OpenAI")
             
-            return {
-                "response": chat_response.choices[0].message.content,
-                "metadata": {
-                    "model": "gpt-3.5-turbo",
-                    "timestamp": time.time(),
-                    "status": "success"
-                }
-            }
+#             return {
+#                 "response": chat_response.choices[0].message.content,
+#                 "metadata": {
+#                     "model": "gpt-3.5-turbo",
+#                     "timestamp": time.time(),
+#                     "status": "success"
+#                 }
+#             }
             
-        except Exception as api_error:
-            st.error(f"OpenAI API Error: {str(api_error)}")
-            return {
-                "response": "I apologize, but I'm having trouble generating a response right now. Please try again later.",
-                "metadata": {
-                    "error": str(api_error),
-                    "timestamp": time.time(),
-                    "status": "error"
-                }
-            }
+#         except Exception as api_error:
+#             st.error(f"OpenAI API Error: {str(api_error)}")
+#             return {
+#                 "response": "I apologize, but I'm having trouble generating a response right now. Please try again later.",
+#                 "metadata": {
+#                     "error": str(api_error),
+#                     "timestamp": time.time(),
+#                     "status": "error"
+#                 }
+#             }
             
-    except Exception as e:
-        st.error(f"Unexpected error in chat response: {str(e)}")
-        return {
-            "response": "An unexpected error occurred. Please try again.",
-            "metadata": {
-                "error": str(e),
-                "timestamp": time.time(),
-                "status": "error"
-            }
-        }
+#     except Exception as e:
+#         st.error(f"Unexpected error in chat response: {str(e)}")
+#         return {
+#             "response": "An unexpected error occurred. Please try again.",
+#             "metadata": {
+#                 "error": str(e),
+#                 "timestamp": time.time(),
+#                 "status": "error"
+#             }
+#         }
 
 def init_openai():
     try:
