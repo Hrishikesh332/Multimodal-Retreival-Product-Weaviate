@@ -9,10 +9,9 @@ import json
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+
 load_dotenv()
 
-# Constants from environment variables
 WEAVIATE_URL = os.getenv("WEAVIATE_URL")
 WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY")
 TWELVELABS_API_KEY = os.getenv("TWELVELABS_API_KEY")
@@ -20,10 +19,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 COLLECTION_NAME = os.getenv("COLLECTION_NAME", "VideoEmbeddings")
 
 
-# Initialize OpenAI client
+
 @st.cache_resource
 def generate_video_embedding(video_url, title="", description=""):
-    """Generate embeddings for a video URL"""
+
     try:
         st.write(f"Processing video: {video_url}")
         
@@ -66,7 +65,7 @@ def generate_video_embedding(video_url, title="", description=""):
         return None, str(e)
 
 def generate_image_embedding(image_file):
-    """Generate embeddings for an uploaded image"""
+
     try:
         twelvelabs_client = TwelveLabs(api_key=TWELVELABS_API_KEY)
         result = twelvelabs_client.embed.create(
@@ -106,7 +105,7 @@ def store_embeddings(client, embeddings):
         return False
 
 def search_similar_videos(client, image_embedding, top_k=5):
-    """Search for similar videos using image embedding"""
+  
     try:
         result = (
             client.query
@@ -124,7 +123,7 @@ def search_similar_videos(client, image_embedding, top_k=5):
         return None, str(e)
 
 def create_timestamped_video_url(video_url, start_time, end_time):
-    """Create video URL with timestamps"""
+
     base_url = video_url.split('#')[0]
     
     if 'youtube.com' in base_url or 'youtu.be' in base_url:
@@ -133,7 +132,7 @@ def create_timestamped_video_url(video_url, start_time, end_time):
         return f"{base_url}#t={int(start_time)},{int(end_time)}"
 
 def render_video_result(result):
-    """Render a video search result"""
+   
     confidence = result.get('_additional', {}).get('certainty', 0)
     
     st.markdown(f"""
@@ -153,7 +152,7 @@ def render_video_result(result):
     st.video(video_url)
 
 def get_chat_response(openai_client, question, context=""):
-    """Get response from OpenAI with enhanced error handling"""
+ 
     try:
         if not openai_client:
             return {
@@ -226,12 +225,12 @@ def init_openai():
 
 @st.cache_resource
 def init_weaviate():
-    """Initialize Weaviate client and create schema if it doesn't exist"""
+ 
     try:
-        # Configure auth
+   
         auth_config = weaviate.auth.AuthApiKey(api_key=WEAVIATE_API_KEY)
         
-        # Create client with embedded connection
+   
         client = weaviate.WeaviateClient(
             connection=weaviate.connect.Connection.from_url(
                 url=WEAVIATE_URL,
@@ -239,7 +238,7 @@ def init_weaviate():
             )
         )
         
-        # Create schema if it doesn't exist
+     
         if not client.schema.exists(COLLECTION_NAME):
             client.schema.create_class(schema)
             st.success(f"Created new class: {COLLECTION_NAME}")
@@ -252,7 +251,7 @@ def init_weaviate():
         return None
 
 def search_page(client):
-    """Image-to-video search interface"""
+
     st.header("Search Videos Using Image")
     
     if client is None:
@@ -301,7 +300,7 @@ def search_page(client):
                         st.warning("No matches found")
 
 def add_video_page(client):
-    """Page for adding new videos"""
+   
     st.header("Add New Video")
     
     if client is None:
@@ -340,18 +339,17 @@ def add_video_page(client):
                         st.error("Failed to store embeddings")
 
 def chat_page(openai_client):
-    """Chat interface"""
+   
     st.header("Chat About Videos")
     
     if openai_client is None:
         st.error("Chat functionality not available. Please check your OpenAI API configuration.")
         return
     
-    # Initialize chat history
+
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             if message["role"] == "assistant":
@@ -362,12 +360,12 @@ def chat_page(openai_client):
             else:
                 st.markdown(message["content"])
 
-    # Chat input
+
     if prompt := st.chat_input("Ask about videos..."):
-        # Add user message
+      
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        # Generate response
+    
         with st.chat_message("assistant"):
             response_data = get_chat_response(openai_client, prompt)
             st.session_state.messages.append({"role": "assistant", "content": response_data})
@@ -376,17 +374,15 @@ def chat_page(openai_client):
 def main():
     st.title("Video Search & Chat Assistant")
     
-    # Initialize clients
+
     weaviate_client = init_weaviate()
     openai_client = init_openai()
     
-    # Navigation
     page = st.sidebar.radio(
         "Choose a feature", 
         ["Add Video", "Image Search", "Chat"]
     )
     
-    # Display selected page
     if page == "Add Video":
         add_video_page(weaviate_client)
     elif page == "Image Search":
@@ -394,7 +390,6 @@ def main():
     else:
         chat_page(openai_client)
     
-    # Sidebar info
     with st.sidebar:
         st.markdown("""
         ### Features
